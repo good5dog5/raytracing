@@ -58,6 +58,11 @@ int main()
         fclose(outfile);
     }
 
+    FILE *output;
+    output = fopen("output.txt", "a");
+    fprintf(output, "raytracing() %lf \n", diff_in_second(start, end));
+    fclose(output);
+
     delete_rectangular_list(&rectangulars);
     delete_sphere_list(&spheres);
     delete_light_list(&lights);
