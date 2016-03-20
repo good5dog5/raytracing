@@ -1,12 +1,8 @@
-EXEC = raytracing
-.PHONY: all
-all: $(EXEC)
 
 CC ?= gcc
-CFLAGS = \
-	-std=gnu99 -Wall -O0 -g
-LDFLAGS = \
-	-lm
+CFLAGS  = -std=gnu99 -Wall -O0 -g
+LDFLAGS = -lm
+
 
 ifeq ($(strip $(PROFILE)),1)
 PROF_FLAGS = -pg
@@ -14,10 +10,13 @@ CFLAGS += $(PROF_FLAGS)
 LDFLAGS += $(PROF_FLAGS) 
 endif
 
-OBJS := \
-	objects.o \
-	raytracing.o \
-	main.o
+OBJS :=  objects.o raytracing.o main.o
+
+EXEC = raytracing
+
+.PHONY: all
+
+all: $(EXEC)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -37,6 +36,14 @@ use-models.h: models.inc Makefile
 	        -e 's/^rectangular /append_rectangular/g' \
 	        -e 's/rectangular[0-9]/(\&&, \&rectangulars);/g' \
 	        -e 's/ = {//g' >> use-models.h
+
+gprfo: $(EXEC)
+	./raytracing
+	gprof raytracing gmon.out > analysis.txt
+
+plot: output.txt
+	gnuplot scripts/runtime.gp
+	eog ./runtime.png
 
 clean:
 	$(RM) $(EXEC) $(OBJS) use-models.h \
