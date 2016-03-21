@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
+#include <immintrin.h>
 
 static inline __forceinline
 void normalize(double *v)
@@ -25,9 +26,11 @@ double length(const double *v)
 static inline __forceinline
 void add_vector(const double *a, const double *b, double *out)
 {
-        out[0] = a[0] + b[0];
-        out[1] = a[1] + b[1];
-        out[2] = a[2] + b[2];
+    __m256i mask = _mm256_set_epi64x(0x0000000000000000, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff);
+    __m256d c    = _mm256_loadu_pd(a);
+    __m256d d    = _mm256_loadu_pd(b);
+    __m256d dst  = _mm256_add_pd(c, d);
+    _mm256_maskstore_pd(out, mask, dst);
 }
 
 static inline __forceinline

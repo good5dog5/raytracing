@@ -1,14 +1,19 @@
 
 CC ?= gcc
-CFLAGS  = -std=gnu99 -Wall -O0 -g
-LDFLAGS = -lm
+CFLAGS  = -std=gnu99 -Wall -O0 -g\
+		  -D__forceinline="__attribute__(())" \
+		  -mavx -pg
 
 
-ifeq ($(strip $(PROFILE)),1)
-PROF_FLAGS = -pg
-CFLAGS += $(PROF_FLAGS)
-LDFLAGS += $(PROF_FLAGS) 
-endif
+LDFLAGS = -lm -pg
+
+
+
+# ifeq ($(strip $(PROFILE)),1)
+# PROF_FLAGS = -pg
+# CFLAGS += $(PROF_FLAGS)
+# LDFLAGS += $(PROF_FLAGS) 
+# endif
 
 OBJS :=  objects.o raytracing.o main.o
 
@@ -39,7 +44,9 @@ use-models.h: models.inc Makefile
 
 gprfo: $(EXEC)
 	./raytracing
-	gprof raytracing gmon.out > analysis.txt
+	@gprof raytracing gmon.out > analysis.txt \
+		&& mv analysis.txt analysis-`date +%m-%d-%H-%M`
+	@diff out.ppm correct.ppm
 
 plot: output.txt
 	gnuplot scripts/runtime.gp
